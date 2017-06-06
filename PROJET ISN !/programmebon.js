@@ -167,11 +167,7 @@ function main(){
             play = true;
         }
     }
-    
-    function mouse_pressed(ev){
-        mouse.press = true;    
-    }
-    
+
     function key_down(ev){             // fonction active à l'appui d'une touche
         switch(ev.keyCode){            // ev clavier Saša
             case 81:kl = true;
@@ -205,8 +201,6 @@ function main(){
     
     function mouse_down(ev){
         mouse.down = 1;
-		mouse.x = ev.clientX - canvas.offsetLeft + document.body.scrollLeft;   //Merci M George
-        mouse.y = ev.clientY - canvas.offsetTop + document.body.scrollTop;
     }
     
     function mouse_up(ev){              //Souris Saša
@@ -214,8 +208,8 @@ function main(){
     }
     
     function mouse_move(ev){
-        mouse.x = ev.x;
-        mouse.y = ev.y;
+	mouse.x = ev.clientX - canvas.offsetLeft + document.body.scrollLeft;   //Merci M George
+        mouse.y = ev.clientY - canvas.offsetTop + document.body.scrollTop;
     }
     
 	function fshoots(whos_shoots,xx,yy, arme){
