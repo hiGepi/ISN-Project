@@ -1,6 +1,7 @@
 function main(){
     var canvas = document.getElementById("game");
     var ctx = canvas.getContext('2d');
+    
     var kl = false;                     // Variable pour les touches
     var ku = false;
     var kr = false;
@@ -10,8 +11,8 @@ function main(){
     var char_jump = 0;
     var score = 0;
     var mouse = {x:0, y:0, down:false};
-	var gun = {delay: 6, delay_recharge: 125, balles: 30, ballesmax: 30, recharge: false, speed_norme: 5, rafale:1, dmg:1};		// caractèristique de l'arme
-	var boss_gun = {delay: 6, delay_recharge: 125, balles: 12, ballesmax: 12, recharge: false, speed_norme: 8, rafale:1, dmg:2};
+	var gun = {delay: 6, delay_recharge: 125, balles: 30, ballesmax: 30, recharge: false, speed_norme: 5};		// caractèristique de l'arme
+	var boss_gun = {delay: 6, delay_recharge: 125, balles: 12, ballesmax: 12, recharge: false, speed_norme: 8};
     var character = [];
 	character[0]={x:canvas.width/2, y:canvas.height/2, xv:5, yv:0, w:15, h:26, jump:200, health:10};       // Elements à créer  
     var shoots = [];
@@ -24,7 +25,6 @@ function main(){
     var boss_w = 50;
     var boss_h = 50;
     var mob_dmg;
-	var rafa_boss=5;
 	var boss = [];
     var a = 1500;
     var tps = 0;
@@ -46,12 +46,6 @@ function main(){
     
     var img_menu = new Image();                             //Design Zied
     img_menu.src = 'menu.png';
-    var img_insane = new Image();
-    img_insane.src = 'insane.png';
-    var img_easy = new Image();
-    img_easy.src = 'easy.png';
-    var img_mid = new Image();
-    img_mid.src = 'mid.png';
     var img_ground = new Image();
     img_ground.src = 'plat.png';
     var img_heal = new Image();
@@ -71,9 +65,8 @@ function main(){
     var img_char_left = new Image();
     img_char_left.src = 'char_left.png';
     
-    var img_map;
     var img_boss = img_boss_left;
-    var img_char = img_char_right;
+    var img_char = img_char_right;     //Zied
     var img_mob;
     var interval_draw;
     var interval_pause;
@@ -124,14 +117,12 @@ function main(){
         if(mouse.x > canvas.width/3 && mouse.x < 2*canvas.width/3 && mouse.down){
             mouse.press = false;
             if(mouse.y > canvas.height/5 - 30 && mouse.y < canvas.height/5 - 30 + canvas.height/6){
-                mob_hp = 2;
+                mob_hp = 2;                                                                             //Zied
                 mob_v = 1;
                 mob_w = 11;
                 mob_h = 20;
                 mob_dmg = 1;
-				rafa_boss = 1;
-                img_mob = img_mob_easy;       
-                img_map = img_easy;
+                img_mob = img_mob_easy;                
                 interval_draw = setInterval(background, 16);
                 interval_pause = setInterval(game_pause, 16);
                 clearInterval(interval_start);
@@ -140,10 +131,8 @@ function main(){
                 mob_v = 1.5;
                 mob_w = 11;
                 mob_h = 17;
-                mob_dmg = 3;
-				rafa_boss = 3;
+                mob_dmg = 2;
                 img_mob = img_mob_mid;
-                img_map = img_mid;
                 interval_draw = setInterval(background, 16);
                 interval_pause = setInterval(game_pause, 16);
                 clearInterval(interval_start);
@@ -152,10 +141,8 @@ function main(){
                 mob_v = 2;
                 mob_w = 11;
                 mob_h = 15;
-                mob_dmg = 5;
-				rafa_boss = 8;
+                mob_dmg = 3;
                 img_mob = img_mob_insane;
-                img_map = img_insane;
                 interval_draw = setInterval(background, 16);
                 interval_pause = setInterval(game_pause, 16);
                 clearInterval(interval_start);
@@ -165,7 +152,7 @@ function main(){
     
     function game_pause(){
         if(esc && pause && play){
-            clearInterval(interval_draw);
+            clearInterval(interval_draw);                      //Zied
             clearInterval(interval_back);
             play = false;
             pause = false;
@@ -212,6 +199,7 @@ function main(){
             case 27:esc = false;
                 break;
         }
+            
     }
     
     function mouse_down(ev){
@@ -225,53 +213,56 @@ function main(){
     }
     
     function mouse_move(ev){
-        mouse.x = ev.x;
-        mouse.y = ev.y;
+        mouse.x = ev.clientX - canvas.offsetLeft + document.body.scrollLeft;
+        mouse.y = ev.clientY - canvas.offsetTop + document.body.scrollTop;
     }
+    
+	function fshoots(whos_shoots,xx,yy, arme){
+		sl= whos_shoots.length-1;
+		dx = xx - whos_shoots[sl].x;
+		dy = whos_shoots[sl].y - yy;
+		hypo = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));  // hypoténus         Kévin
+		whos_shoots[sl].xv = dx/hypo * arme.speed_norme;
+		whos_shoots[sl].yv = dy/hypo * arme.speed_norme;
+	} 
         
     function background(){
-		tps += 16;													//Kevin
+		tps = tps + 16;
 		if(tps > timemob){
 			timemob += a;
 			if(pop){
 				mob.push( {x: Math.floor((canvas.width-10)*Math.random())+5, y: Math.floor((canvas.height-100)*Math.random())+50, xv:mob_v, yv:0, w:mob_w, h:mob_h , goRight:0, health:mob_hp, dmg:mob_dmg, point:1, img:img_mob});
-				if(a>1000)a-=50;
+				if(a>1000)a-=50;        //Kévin
 			}
 
-			if(score >= 11 * coef_one){
+			if(score >= 10 * coef_one){
 				for( var i = 0; i < 10; i++){
-					mob.push({x: Math.floor((canvas.width-10)*Math.random())+5, y: Math.floor((canvas.height-200)*Math.random())+100, xv:mob_v, yv:0, w:mob_w, h:mob_h, goRight:0, health:mob_hp, dmg:mob_dmg, point:1, img:img_mob});
+					mob.push({x: Math.floor((canvas.width-10)*Math.random())+5, y: Math.floor((canvas.height-200)*Math.random())+100, xv:mob_v, yv:0, w:mob_w, h:mob_h, goRight:0, health:mob_hp, dmg:mob_dmg, point:2, img:img_mob});
 					coef_one++;
 					pop = false;
 				}
 			}
 			else if(score >= 20 * coef_two){
 				boss.push({x: Math.floor((canvas.width-10)*Math.random())+5, y: Math.floor((canvas.height-100)*Math.random())+50, xv:1.75, yv:0, w:boss_w, h:boss_h, goRight:0, health:25, dmg:2.5, point:5, img:img_boss, boss:true});
-				boss_gun = {delay: 6, delay_recharge: 125, balles: 12, ballesmax: 12, recharge: false, speed_norme: 8, rafale:rafa_boss, dmg:2};
-				pop = false;
-				popb = false;				
+				pop = false;	       
 				coef_two++;
 			}
 			else if(mob.length < 1 && boss.length < 1){
 				pop = true;
-				popb = true;
+                
                 for(g = 1; g <= ground.length-1; g++){                  // Zied
-                    ground[g].splice(0,ground[g].length);
+                    ground[g].splice(0,ground[g].length-1);
                 }
-				
-                var gx = Math.floor(Math.random()*(canvas.width/2-150));
-                var gy = Math.floor(Math.random()*(50));
-                for(var i = 0; i <= 29; i++){
+                
+                for(var i = 0; i < 29; i++){
                     for(var m = 0; m <= 4; m++){
-                        ground[1].push({x:gx+i*bloc, y:(3*canvas.height/4)-gy + m*bloc, w:bloc, h:bloc,v:3, img:img_ground});
-                        ground[2].push({x:(3*canvas.width/4) - gx +i*bloc, y:(3*canvas.height/4) - gy + m*bloc, w:bloc, h:bloc, v:3, img:img_ground});   //Spawn de 4 plateformes aléatoires.
+                        ground[1].push({x:5+i*bloc, y:2*canvas.height/3 + m*bloc, w:bloc, h:bloc,v:3, img:img_ground});
+                        ground[2].push({x:3*canvas.width/4 - 5 +i*bloc, y:2*canvas.height/3 + m*bloc, w:bloc, h:bloc, v:3, img:img_ground});   //Spawn de 4 plateformes aléatoires.
                     }
                 }
-                gx = Math.floor(Math.random()*(canvas.width-200));
-                gy = Math.floor(Math.random()*50);
                 for(var i = 0; i <= 39; i++){
                     for(var m = 0; m <= 7; m++){
-                        ground[3].push({x:gx + i*bloc,y:canvas.height/2 - gy + m*bloc,w:bloc,h:bloc,v:2, img:img_ground});   //Zied
+                        ground[3].push({x:canvas.width/3 + i*bloc,y:canvas.height/2 + m*bloc,w:bloc,h:bloc,v:2, img:img_ground});   //Zied
                     }
                 }
 			}
@@ -282,15 +273,14 @@ function main(){
 		}
 
 		
-		fshoots(mouse.down, gun, shoots, character, mouse, 2);
-		fshoots(boss.length, boss_gun, boss_shoots, boss, character[0], 2);
+		fshoots_(mouse.down, gun, shoots, character, mouse, 2);
+		fshoots_(boss.length, boss_gun, boss_shoots, boss, character[0], 2);
 		
 
         ctx.clearRect(0,0,canvas.width,canvas.height);
         ctx.beginPath();                                                   // Dessin des éléments Saša
         ctx.font="20px Arial";
         ctx.fillText("Score: " + score, 10, 40);
-        ctx.drawImage(img_map,0,0);
         ctx.drawImage(img_char, character[0].x, character[0].y);
         var grd = ctx.createLinearGradient(0, 0, 160, 0);
         ctx.fillStyle="#cca300";
@@ -308,7 +298,7 @@ function main(){
         ctx.fillStyle = "white";
 		
 		draw(mob);
-		draw(bonus);    //function draw Kévin    //function draw_s sasha
+		draw(bonus);    //function draw Kévin
 		draw_s(shoots);
 		draw_s(boss_shoots);
 		draw(boss);
@@ -407,13 +397,13 @@ function main(){
     }										
 										
 	function draw(object){
-		for(var m=0; m < object.length; m++){
+		for(var m=0; m <= object.length-1; m++){
 			ctx.drawImage(object[m].img, object[m].x, object[m].y);
 		}
 	}                                                                                      //Kévin
     
     function draw_s(object){
-		for(var m=0; m < object.length; m++){
+		for(var m=0; m <= object.length-1; m++){
 			ctx.rect(object[m].x, object[m].y, object[m].size, object[m].size);
 		}
 	}       
@@ -431,24 +421,36 @@ function main(){
                         if(character[0].x >= ground[i][0].x - character[0].w && character[0].x <= ground[i][ground[i].length-1].x + ground[i][l].w && character[0].y < ground[i][l].y && character[0].y >= ground[i][l].y - canvas.height/4){     // Détecte sur quel plateau est le joueur
                             if(character[0].x - object[m].x > 0){
                                 object[m].goRight = 2;
-                                if(object[m].boss){
+                                if(object[m].boss == true){
                                     img_boss = img_boss_right;
                                 }
                             }
                             else{
                                 object[m].goRight = -2;
-                                if(object[m].boss){
+                                if(object[m].boss == true ){
                                     img_boss = img_boss_left;
                                 }
                             }
                         }else if (i==0 && (ground[0][0].x + ground[0][0].w - object[m].x < object[m].w) ){
 							object[m].goRight = -1;
+                            if(object[m].boss == true ){
+                                img_boss = img_boss_right;
+                            }
 						}else if (i==0 && (ground[0][0].x + object[m].w > object[m].x)){
 							object[m].goRight = 1;
+                             if(object[m].boss == true ){
+                                img_boss = img_boss_left;
+                            }
 						}else if (i!=0&&ground[i][ground[i].length-1].x + bloc - object[m].w < object[m].x) {			// object va à droite
                             object[m].goRight = -1;
+                            if(object[m].boss == true ){
+                                img_boss = img_boss_right;
+                            }
                         } else if (i!=0&&ground[i][0].x + object[m].xv > object[m].x) {							// object va à gauche
                             object[m].goRight = 1;
+                            if(object[m].boss == true ){
+                                img_boss = img_boss_left;
+                            }
                         }
 					}
                 }
@@ -480,11 +482,11 @@ function main(){
         }
 	}
 	
-	function shoots_interaction(target,whos_shoots,s, arme){                      //Kévin
+	function shoots_interaction(target,whos_shoots,s){                      //Kévin
 	    for(var m=0; m <= target.length -1; m++){
             if(whos_shoots[s].x + whos_shoots[s].size >= target[m].x && whos_shoots[s].x <= target[m].x + target[m].w && whos_shoots[s].y + whos_shoots[s].size >= target[m].y && whos_shoots[s].y <= target[m].y + target[m].h){
-                target[m].health-=arme.dmg;
-				whos_shoots.splice(s,1);
+                target[m].health--;
+                whos_shoots.splice(s,1);
 				if(target[m].health <= 0){
 					score+= target[m].point;
                     target.splice(m,1);
@@ -493,21 +495,14 @@ function main(){
 		}
 	}
 	
-	function fshoots(condition, arme, whos_shoots, start_point, target, size){          //Kévin
+	function fshoots_(condition, arme, whos_shoots, start_point, target, size){          //Kévin
+        
 		if (condition>0 && arme.delay >= 6 && arme.recharge == false){
-			for( i=0; i< arme.rafale; i++){
-				whos_shoots.push( {x: start_point[0].x + start_point[0].w/2, y: start_point[0].y + start_point[0].h/2, xv: 0, yv: 0, size: size});
-			}
-			for(var sl=whos_shoots.length-1; sl > whos_shoots.length - arme.rafale-1; sl--){
-				dx = target.x - whos_shoots[sl].x;
-				dy = whos_shoots[sl].y - target.y;
-				hypo = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));  // hypoténus 
-				whos_shoots[sl].xv = dx/hypo * arme.speed_norme;
-				whos_shoots[sl].yv = dy/hypo * arme.speed_norme;
-			}
+			whos_shoots.push( {x: start_point[0].x + start_point[0].w/2, y: start_point[0].y + start_point[0].h/2, xv: 0, yv: 0, size: size}) ;
+			fshoots(whos_shoots,target.x, target.y, arme);
 			arme.delay = 0;
-			arme.balles-=arme.rafale;
-			arme.delay_recharge -= 125/arme.ballesmax*arme.rafale;
+			arme.balles--;
+			arme.delay_recharge -= 125/arme.ballesmax;
 			if (arme.balles == 0) arme.recharge = true;
 		}
 
@@ -519,15 +514,14 @@ function main(){
 			arme.balles = arme.ballesmax;
 			arme.recharge = false;
 		}
-		
 		for(var s=0; s < whos_shoots.length; s++){
 			whos_shoots[s].x += whos_shoots[s].xv;
 			whos_shoots[s].y -= whos_shoots[s].yv;
 			for(var g=0; g <= ground.length-1; g++){
                 for(var l=0; l <= ground[g].length-1; l++){
-                    if(whos_shoots[s].x + 2*whos_shoots[s].size >= ground[g][l].x && whos_shoots[s].x <= ground[g][l].x + 2*ground[g][l].w && whos_shoots[s].y + 2*whos_shoots[s].size >= ground[g][l].y && whos_shoots[s].y <= ground[g][l].y + 2*ground[g][l].h){
-						whos_shoots.splice(s,1);
-                        ground[g][l].v-=arme.dmg;
+                    if(whos_shoots[s].x + whos_shoots[s].size >= ground[g][l].x && whos_shoots[s].x <= ground[g][l].x + ground[g][l].w &&      whos_shoots[s].y + whos_shoots[s].size >= ground[g][l].y && whos_shoots[s].y <= ground[g][l].y + ground[g][l].h){
+                        whos_shoots.splice(s,1);
+                        ground[g][l].v--;
                     }
                 }
             }
@@ -535,11 +529,11 @@ function main(){
                 whos_shoots.splice(s,1);
             }
 			if (start_point === character){
-				shoots_interaction(mob,shoots,s, arme);
-				shoots_interaction(boss,shoots,s, arme);
+				shoots_interaction(mob,shoots,s);
+				shoots_interaction(boss,shoots,s);
 			}
 			if (start_point === boss){
-				shoots_interaction(character, boss_shoots,s, arme);
+				shoots_interaction(character, boss_shoots,s);
 			}
 		}
 	}
